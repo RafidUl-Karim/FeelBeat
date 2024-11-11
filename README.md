@@ -20,21 +20,9 @@ FeelBeat is a project that introduces an innovative music recommendation system 
 3. **Hybrid Recommendation Engine:** Determines the user’s final mood using both facial recognition and contextual cues, applying content-based filtering for optimal music recommendations.
 4. **Personalized Playlist Generation:** Based on the detected mood, a playlist of 10 songs that best matches the user's current emotional state is generated.
 
-## Screenshots
+## Custom Resnet Architecture 
 
-### Homepage
-![Homepage](https://drive.google.com/uc?export=view&id=1sokOKTJNMORY6tjr4BPgC25r49bB090D)
-
-### Mood Detection in Action
-![Mood Detection](https://drive.google.com/uc?export=view&id=1b_DxWwLZi6T3IMMa_9aj05ONSO9-BHTC)
-
-### Suggested Playlist Based on Mood
-![Mood-Based Playlist](https://drive.google.com/uc?export=view&id=1EP6p5Cq8H_I65HoTlOH2hkCBkY7Hf6me)
-
-### Custom Resnet Architecture 
 ![Custom Resnet](https://drive.google.com/uc?export=view&id=1co0cvtBEdThOqwZnYFqjdnQe_ccV79w5)
-
-> *Add your screenshots in the sections above to showcase the app's functionalities.*
 
 ## Datasets Used
 
