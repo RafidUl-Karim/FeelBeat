@@ -5,6 +5,7 @@ from tensorflow import keras
 from sklearn.metrics.pairwise import cosine_similarity
 from joblib import load
 import requests
+from rmn import RMN
 
 # Load pre-trained models and data
 
@@ -21,33 +22,64 @@ label_map = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
 data = pd.read_csv('/Users/rafid/OneDrive/Desktop/VSCode/Python/FeelBeat/FeelBeat/FB_Web/FeelBeat/fer/utilities/data_moods.csv')
 
 
-def process_image(image_np, activity):
-    gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
-    faces = cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+# def process_image(image_np, activity):
+#     gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
+#     faces = cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
 
-    for (x, y, w, h) in faces:
-        roi_gray = gray[y:y+h, x:x+w]
-        roi_gray = cv2.resize(roi_gray, (48, 48))
-        roi_gray = roi_gray.astype("float32") / 255.0
-        roi_gray = np.expand_dims(roi_gray, axis=0)  # Add batch dimension
-        roi_gray = np.expand_dims(roi_gray, axis=-1)  # Add channel dimension
+#     for (x, y, w, h) in faces:
+#         roi_gray = gray[y:y+h, x:x+w]
+#         roi_gray = cv2.resize(roi_gray, (48, 48))
+#         roi_gray = roi_gray.astype("float32") / 255.0
+#         roi_gray = np.expand_dims(roi_gray, axis=0)  # Add batch dimension
+#         roi_gray = np.expand_dims(roi_gray, axis=-1)  # Add channel dimension
 
-        prediction = resnet50.predict(roi_gray)
-        label = np.argmax(prediction, axis=1)
-        emotion = label_map[label[0]]
-        confidence = np.max(prediction)  # passing the max probability as confidence
+#         prediction = resnet50.predict(roi_gray)
+#         label = np.argmax(prediction, axis=1)
+#         emotion = label_map[label[0]]
+#         confidence = np.max(prediction)  # passing the max probability as confidence
         
-        # emotion, recommended_songs = hybrid_helper(activity, emotion, confidence)  # Passing confidence instead of raw prediction
+#         # emotion, recommended_songs = hybrid_helper(activity, emotion, confidence)  # Passing confidence instead of raw prediction
 
-        print("Predicted Emotion:", emotion)
-        print("Recommended Songs:")
-        features = ['valence', 'tempo', 'danceability', 'energy','instrumentalness','liveness']
+#         print("Predicted Emotion:", emotion)
+#         print("Recommended Songs:")
+#         features = ['valence', 'tempo', 'danceability', 'energy','instrumentalness','liveness']
+#         songs_df = pd.read_csv('/Users/rafid/OneDrive/Desktop/VSCode/Python/FeelBeat/FeelBeat/FB_Web/FeelBeat/fer/utilities/data_moods.csv').dropna()
+#         recommended_songs = content_based_recommendations(emotion,songs_df,features)
+
+#         return emotion, recommended_songs
+
+#     return None, None  # Return None if no faces are detected
+
+
+m = RMN()
+
+def process_image(image_np, activity):
+    """
+    Process the input image to detect faces, predict emotions, and recommend songs.
+    Uses RMN for emotion detection.
+    """
+    # Detect emotions using RMN
+    results = m.detect_emotion_for_single_frame(image_np)
+
+    if results:
+        # Extract the first detected mood and confidence score
+        mood = results[0]['emo_label']
+        confidence = results[0]['emo_proba']
+
+        print(f"Detected Mood: {mood} with Confidence: {confidence}")
+        
+        # Annotate image with detected emotions (optional)
+        image_np = m.draw(image_np, results)
+        cv2.imwrite("output.png", image_np)  # Save annotated image (optional)
+        
+        # Recommend songs based on the detected mood
+        features = ['valence', 'tempo', 'danceability', 'energy', 'instrumentalness', 'liveness']
         songs_df = pd.read_csv('/Users/rafid/OneDrive/Desktop/VSCode/Python/FeelBeat/FeelBeat/FB_Web/FeelBeat/fer/utilities/data_moods.csv').dropna()
-        recommended_songs = content_based_recommendations(emotion,songs_df,features)
+        recommended_songs = content_based_recommendations(mood, songs_df, features)
 
-        return emotion, recommended_songs
+        return mood, recommended_songs, confidence
 
-    return None, None  # Return None if no faces are detected
+    return None, None  # Return None if no emotions are detected
 
 
 def context_aware(data, model_path):
@@ -83,7 +115,7 @@ def context_aware(data, model_path):
 def content_based_recommendations(mood, songs_df, features, num_recommendations=10, top_n=100):
     moods_map = {
         'angry': 'calm',
-        'disgusted': 'energetic',
+        'disgust': 'energetic',
         'fear': 'calm',
         'happy': 'happy',
         'neutral': 'neutral',
@@ -118,7 +150,7 @@ def content_based_recommendations(mood, songs_df, features, num_recommendations=
         else:
             recommendations = top_similar_songs
         
-        print(f"Recommendations for :",recommendations)
+        print(f"Recommendations for :\n", recommendations[['track_name', 'artist_name', 'mood', 'similarity']])
         return recommendations[['track_name', 'artist_name']]
     
     else:

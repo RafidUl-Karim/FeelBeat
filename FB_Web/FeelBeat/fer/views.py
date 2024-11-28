@@ -93,7 +93,7 @@ def upload_and_process(request):
             if not isinstance(image_np, np.ndarray) or not isinstance(activity, (str, int)):
                 return HttpResponseBadRequest("Invalid data types for image or activity")
 
-            emotion, recommended_songs = process_image(image_np, activity)
+            emotion, recommended_songs, confidence = process_image(image_np, activity)
 
             if emotion is None:
                 return JsonResponse({
@@ -106,14 +106,13 @@ def upload_and_process(request):
             
             return render(request, 'fer/results.html', {
                 'emotion': emotion,
-                'recommended_songs': recommended_songs.to_dict(orient='records') if not recommended_songs.empty else []
+                'recommended_songs': recommended_songs.to_dict(orient='records') if not recommended_songs.empty else [],
+                'confidence': confidence * 100, 
             })
         except Exception as e:
             return HttpResponseBadRequest(f"Error processing image: {e}")
     else:
         return render(request, 'fer/upload.html')
-
-
     
 
 
