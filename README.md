@@ -48,20 +48,6 @@ FeelBeat shows significant improvement in recommendation relevance, with up to 2
 | VGG19               | 70.2%              | 69%              | 69%            |
 | Inception-ResNetV2  | 61.7%              | -                | -              |
 
-## Getting Started
-
-1. **Clone the repository**
-   ```bash
-   https://github.com/tanzim10/FeelBeat.git
-   ```
-2.  **Install dependencies**
-    ``` bash
-    pip install -r requirements.txt
-    ```
-4.  **Run the Application**
-    ```bash
-    python3 manage.py runserver
-    ```
 
 ## License
 This project is licensed under the MIT License.
